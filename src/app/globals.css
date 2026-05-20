@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 240 10% 90%;
+    
+    --card: 240 10% 5.9%;
+    --card-foreground: 240 10% 90%;
+    
+    --popover: 240 10% 4.9%;
+    --popover-foreground: 240 10% 90%;
+    
+    --primary: 158 80% 40%; /* Premium Islamic Emerald */
+    --primary-foreground: 144 100% 97%;
+    
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 240 10% 90%;
+    
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
+    
+    --accent: 158 50% 15%;
+    --accent-foreground: 158 80% 90%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 158 80% 40%;
+    
+    --radius: 1.25rem;
+  }
+}
+
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-arabic: 'Amiri', 'Traditional Arabic', Georgia, serif;
+}
+
+body {
+  background-color: #09090b; /* Tinted Charcoal/Zinc-950 - NO PURE BLACK */
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.3); /* Subtle primary tint on scrollbar hover */
+}
+
+/* Mesh background gradients */
+.mesh-gradient {
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(158, 80%, 40%, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(168, 80%, 40%, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, hsla(240, 10%, 4%, 0.95) 0px, transparent 80%);
+}
+
+/* Liquid glass refraction card */
+.glass-panel {
+  background: rgba(20, 20, 25, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 15px 40px -15px rgba(16, 185, 129, 0.1);
+}
+
+/* Arabic Quranic typography settings */
+.quran-arabic-text {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  font-size: 1.875rem; /* text-3xl */
+  line-height: 2.75rem;
+}
+
+/* Grain Noise Overlay */
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.015;
+}
+
+/* Shine overlay effect */
+.shine-overlay {
+  background: linear-gradient(
+    45deg,
+    transparent 25%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 75%
+  );
+  background-size: 200% 200%;
+}
+
+/* Tabular figures for monospace metrics */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,50 @@
+{
+  "name": "noor-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "rag:process:quran": "ts-node --project tsconfig.json -r tsconfig-paths/register scripts/process-quran.ts",
+    "rag:process:hadith": "ts-node --project tsconfig.json -r tsconfig-paths/register scripts/process-hadith.ts",
+    "rag:process": "npm run rag:process:quran && npm run rag:process:hadith",
+    "rag:embed": "ts-node --project tsconfig.json -r tsconfig-paths/register scripts/embed.ts",
+    "rag:embed:quran": "ts-node --project tsconfig.json -r tsconfig-paths/register scripts/embed.ts --type quran",
+    "rag:embed:hadith": "ts-node --project tsconfig.json -r tsconfig-paths/register scripts/embed.ts --type hadith",
+    "rag:pipeline": "npm run rag:process && npm run rag:embed",
+    "rag:dry-run": "npm run rag:process && npm run rag:embed -- --dry-run",
+    "rag:test": "ts-node --project tsconfig.json -r tsconfig-paths/register scripts/test-retrieval.ts"
+  },
+  "dependencies": {
+    "@phosphor-icons/react": "^2.1.7",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@supabase/supabase-js": "^2.43.4",
+    "@tailwindcss/oxide-darwin-arm64": "^4.3.0",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.11.17",
+    "lucide-react": "^0.475.0",
+    "next": "16.2.6",
+    "openai": "^4.83.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/ws": "^8.18.1",
+    "cross-fetch": "^4.1.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5",
+    "ws": "^8.20.1"
+  }
+}

@@ -103,6 +103,8 @@ ${groundedContext}
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({
       async start(controller) {
+        // Track whether the SSE stream has already been closed to avoid duplicate closes
+        let streamClosed = false;
         // Step A: Immediately send the sources/citations to the client
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ type: "sources", data: citations })}\n\n`)
@@ -194,20 +196,27 @@ ${groundedContext}
             }
           }
 
-          // Step E: Close the stream
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
-          controller.close();
+          // Step E: Close the stream safely
+          if (!streamClosed) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
+            controller.close();
+            streamClosed = true;
+          }
         } catch (streamError) {
+          // Error handling – only send error if stream not already closed
+          if (!streamClosed) {
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  type: "error",
+                  data: "A streaming failure occurred during response generation. Make sure Ollama is running."
+                })}\n\n`
+              )
+            );
+            controller.close();
+            streamClosed = true;
+          }
           console.error("Error during Ollama chat completions stream:", streamError);
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({
-                type: "error",
-                data: "A streaming failure occurred during response generation. Make sure Ollama is running.",
-              })}\n\n`
-            )
-          );
-          controller.close();
         }
       },
     });

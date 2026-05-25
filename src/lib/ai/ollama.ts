@@ -104,6 +104,65 @@ export async function generateEmbedding(
 }
 
 // ---------------------------------------------------------------------------
+// Query Expansion
+// ---------------------------------------------------------------------------
+
+/**
+ * Expand a user query to include synonyms, transliterations, and related Islamic terminology.
+ * Uses the Chat model to process the text.
+ */
+export async function expandQuery(query: string): Promise<string> {
+  const prompt = `You are an expert Islamic terminology translator. The user will provide a search query. 
+Your task is to identify any Islamic terms, colloquial spellings, or concepts in the query, and output a SINGLE string containing the original query PLUS 2-3 accurate synonyms (such as canonical Arabic transliteration and English meanings).
+DO NOT include any explanations, punctuation (like commas), or conversational text. JUST return the space-separated words.
+
+Example Input: Sabar
+Example Output: Sabar Sabr patience steadfastness endurance
+
+Input: ${query}
+Output:`;
+
+  const model = process.env.OLLAMA_CHAT_MODEL ?? "llama3";
+  
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT_MS);
+
+    const res = await fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        prompt,
+        stream: false,
+        options: {
+          temperature: 0.1, // Keep it very deterministic
+        }
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      console.warn("[ollama] Query expansion failed, falling back to original query.");
+      return query;
+    }
+
+    const data = await res.json();
+    const expandedText = data.response?.trim();
+    
+    if (expandedText && expandedText.length > 0) {
+      return expandedText;
+    }
+    return query;
+  } catch (err) {
+    console.warn("[ollama] Error during query expansion, using original query:", err);
+    return query;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Batch embedding with concurrency control
 // ---------------------------------------------------------------------------
 

@@ -16,7 +16,6 @@ interface CitationCardProps {
  * Renders Arabic script and English translation with dynamic height expanders.
  */
 export function CitationCard({ result, index }: CitationCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const percentage = Math.round(result.relevance_score * 100);
@@ -33,17 +32,16 @@ export function CitationCard({ result, index }: CitationCardProps) {
         type: "spring",
         stiffness: 100,
         damping: 18,
-        delay: index * 0.05, // Cascading stagger delays
+        delay: index * 0.05,
       }}
+      style={{ scrollSnapAlign: "start" }}
       className={cn(
-        "shrink-0 glass-panel glass-panel-hover rounded-2xl overflow-hidden transition-all duration-300 w-full flex flex-col group relative"
+        "shrink-0 glass-panel glass-panel-hover rounded-2xl overflow-hidden transition-all duration-300 w-72 h-full flex flex-col group relative cursor-pointer hover:border-emerald-500/30 hover:shadow-emerald-900/20"
       )}
+      onClick={() => setIsModalOpen(true)}
     >
       {/* Top Banner: Source Metadata + Relevance Score Gauge */}
-      <div 
-        className="p-5 flex items-center justify-between border-b border-zinc-800/40 bg-zinc-900/20 cursor-pointer hover:bg-zinc-800/20 transition-colors"
-        onClick={() => setIsModalOpen(true)}
-      >
+      <div className="p-5 flex items-center justify-between border-b border-zinc-800/40 bg-zinc-900/20 transition-colors">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 rounded-lg bg-emerald-950/40 border border-emerald-900/30 flex items-center justify-center text-emerald-400">
             {result.type === "quran" ? (
@@ -64,87 +62,20 @@ export function CitationCard({ result, index }: CitationCardProps) {
 
       </div>
 
-      {/* Main Content Area */}
-      <div className="p-5 flex-1 flex flex-col gap-4">
-        {/* Arabic calligraphy rendering */}
-        <div className="text-right w-full">
-          <p className="quran-arabic-text text-zinc-100 selection:bg-emerald-500/30">
+      {/* Main Content Area — overflow-hidden so card stays within fixed strip height */}
+      <div className="p-4 flex-1 flex flex-col gap-2 overflow-hidden">
+        {/* Arabic calligraphy rendering — clipped to 2 lines */}
+        <div className="text-right w-full overflow-hidden">
+          <p className="quran-arabic-text text-zinc-100 selection:bg-emerald-500/30 line-clamp-2 leading-relaxed">
             {result.text_arabic}
           </p>
         </div>
 
-        {/* English translation with maximum character width guidelines */}
-        <p className="text-sm text-zinc-300 leading-relaxed font-sans max-w-[65ch]">
+        {/* English translation — clipped to 2 lines */}
+        <p className="text-xs text-zinc-400 leading-relaxed font-sans line-clamp-2">
           {result.text_english}
         </p>
-
-        {/* Metadata Footer: expandable sections */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <div className="pt-4 border-t border-zinc-800/40 grid grid-cols-2 gap-3 text-xs font-mono">
-                {result.type === "quran" ? (
-                  <>
-                    <div className="bg-zinc-900/30 p-2 rounded-lg border border-zinc-800/30">
-                      <span className="text-zinc-500 block">Juz / Chapter</span>
-                      <span className="text-zinc-300">{result.metadata.juz}</span>
-                    </div>
-                    <div className="bg-zinc-900/30 p-2 rounded-lg border border-zinc-800/30">
-                      <span className="text-zinc-500 block">Revelation Site</span>
-                      <span className="text-zinc-300 capitalize">
-                        {result.metadata.revelation_place}
-                      </span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="bg-zinc-900/30 p-2 rounded-lg border border-zinc-800/30 col-span-2">
-                      <span className="text-zinc-500 block">Grade / Verification</span>
-                      <span
-                        className={cn("font-semibold", {
-                          "text-emerald-400": result.metadata.grade?.toLowerCase() === "sahih",
-                          "text-amber-400": result.metadata.grade?.toLowerCase() === "hasan",
-                          "text-zinc-400": result.metadata.grade?.toLowerCase() !== "sahih" && result.metadata.grade?.toLowerCase() !== "hasan",
-                        })}
-                      >
-                        {result.metadata.grade || "Authentic Verification"}
-                      </span>
-                    </div>
-                    <div className="bg-zinc-900/30 p-2 rounded-lg border border-zinc-800/30 col-span-2">
-                      <span className="text-zinc-500 block">Narrator Chain</span>
-                      <span className="text-zinc-300">{result.metadata.narrator_english}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
-
-      {/* Accordion trigger footer */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full py-2.5 px-5 bg-zinc-900/10 hover:bg-zinc-900/30 border-t border-zinc-850 flex items-center justify-center gap-1.5 text-xs font-semibold tracking-wider text-zinc-500 hover:text-zinc-300 transition-colors uppercase cursor-pointer"
-      >
-        {isExpanded ? (
-          <>
-            Hide Context Detail
-            <ChevronUp className="h-3 w-3" />
-          </>
-        ) : (
-          <>
-            Reveal Context Detail
-            <ChevronDown className="h-3 w-3" />
-          </>
-        )}
-      </button>
 
       {/* Fullscreen Detailed Modal */}
       <AnimatePresence>

@@ -95,7 +95,7 @@ export function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "relative flex items-center w-full max-w-3xl mx-auto rounded-2xl transition-all duration-300 p-1.5 bg-zinc-950/40 border",
+        "relative flex items-center w-full max-w-5xl mx-auto rounded-2xl transition-all duration-300 p-1.5 bg-zinc-950/40 border",
         {
           "border-emerald-500/40 shadow-[0_0_25px_-5px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/20 bg-zinc-950/80":
             isFocused,
@@ -127,7 +127,7 @@ export function SearchBar({ onSearch, isLoading = false }: SearchBarProps) {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           disabled={isLoading}
-          className="w-full h-12 bg-transparent border-0 outline-none focus:ring-0 text-base md:text-lg text-zinc-100 placeholder-transparent select-text pr-10"
+          className="w-full h-16 bg-transparent border-0 outline-none focus:ring-0 text-base md:text-lg text-zinc-100 placeholder-transparent select-text pr-10"
         />
 
         {/* Animated dynamic typewriter placeholder overlay */}

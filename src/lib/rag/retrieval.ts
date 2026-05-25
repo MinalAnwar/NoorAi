@@ -9,14 +9,18 @@
  */
 
 import { supabase } from "../supabase/client";
-import { generateEmbedding } from "../ai/ollama";
+import { generateEmbedding, expandQuery } from "../ai/ollama";
 import type { RetrievalResult, CitationType } from "@/types";
 import type { DocumentType } from "./types";
 
 export interface RetrievalOptions {
   limit?: number;
+  /** Minimum similarity threshold for results. Default 0.0 */
+  threshold?: number;
   /** Focus search on specific source: 'all', 'quran', or 'hadith' */
   sourceFocus?: "all" | DocumentType;
+  /** Filter by specific Surah number */
+  surahFilter?: number;
   /** Filter by specific dataset source string (e.g., "Sahih al-Bukhari") */
   collectionFilter?: string;
   /** Weight between 0.0 (pure keyword) and 1.0 (pure semantic). Default 0.7 */
@@ -38,10 +42,14 @@ export async function retrieveGroundedSources(
   } = options;
 
   try {
+    // 0. Expand query to include synonyms/transliterations
+    const expandedQuery = await expandQuery(query);
+    console.log(`[retrieval] Original: "${query}", Expanded: "${expandedQuery}"`);
+
     // 1. Generate query embedding via local Ollama
     let queryEmbedding: number[] = [];
     try {
-      queryEmbedding = await generateEmbedding(query);
+      queryEmbedding = await generateEmbedding(expandedQuery);
     } catch (err) {
       console.warn("[retrieval] Failed to generate vector embedding, falling back to pure keyword search.", err);
       // We pass a zero-vector if embedding fails, and set semanticWeight to 0 for pure FTS
@@ -53,7 +61,7 @@ export async function retrieveGroundedSources(
 
     // 3. Execute hybrid search RPC on Supabase
     const { data, error } = await supabase.rpc("hybrid_search_documents", {
-      query_text: query,
+      query_text: expandedQuery,
       query_embedding: queryEmbedding,
       match_count: limit,
       filter_type: filterType,

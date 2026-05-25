@@ -443,7 +443,7 @@ export default function Home() {
         className="w-full bg-[#09090b] py-8 scroll-mt-16 relative z-10"
       >
         <div className="max-w-7xl mx-auto px-4 flex flex-col gap-6">
-          <div className="w-full bg-[#0a0a0d]/80 border border-zinc-800 rounded-3xl overflow-hidden shadow-[0_0_50px_-12px_rgba(16,185,129,0.1)] relative">
+          <div className="w-full bg-[#0a0a0d]/80 border border-zinc-800 rounded-3xl shadow-[0_0_50px_-12px_rgba(16,185,129,0.1)] relative">
             <ChatInterface 
               initialQuery={activeQuery} 
               onQueryProcessed={() => setActiveQuery("")} 
@@ -578,92 +578,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
-      {/* 8. FEATURES BENTO GRID SECTION (Moved to BOTTOM) */}
-      <section className="w-full max-w-7xl mx-auto px-4 py-16 md:py-24 flex flex-col gap-12 border-t border-zinc-900/60">
-        <div className="max-w-xl">
-          <span className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-500 font-mono block mb-2">
-            Technological Architecture
-          </span>
-          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tighter text-zinc-100">
-            Engineered For Absolute Theological Safety
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
-          <div className="md:col-span-7 glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between gap-8 border border-zinc-800/40 relative shadow-lg group hover:border-emerald-500/10 transition duration-300">
-            <div className="absolute inset-0 bg-emerald-500/1 pointer-events-none rounded-3xl" />
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[9px] bg-emerald-950/40 border border-emerald-900/30 text-emerald-400 px-2 py-0.5 rounded uppercase">Zero Hallucinations</span>
-                <ShieldCheck className="h-4.5 w-4.5 text-emerald-500" />
-              </div>
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-100">Verbatim Theological Pinpointing</h3>
-              <p className="text-sm md:text-base text-zinc-300 leading-relaxed">Standard AI models synthesize random text, resulting in severe factual fabrications. Noor AI locks inputs inside active search pipelines. Every word in the response maps directly back to a verified database verse or Hadith narrator index.</p>
-            </div>
-            <div className="border border-zinc-900 bg-zinc-950/30 rounded-xl p-4 space-y-3 font-mono text-[10px] text-zinc-500 select-none">
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-                <span className="text-zinc-400">RAG PROCESSOR</span>
-                <span className="text-emerald-500 animate-pulse">ACTIVE</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span className="text-zinc-300">Query Embedding: mapped [768 dimensions]</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span className="text-zinc-300">Hybrid Match: Cosine Index + English FTS Fused</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="md:col-span-5 glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between gap-8 border border-zinc-800/40 relative shadow-lg group hover:border-emerald-500/10 transition duration-300">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[9px] bg-zinc-900 border border-zinc-850 text-zinc-400 px-2 py-0.5 rounded uppercase">Vector Engine</span>
-                <Layers className="h-4.5 w-4.5 text-zinc-400" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight text-zinc-100">768-Dimensional Semantic Indexing</h3>
-              <p className="text-sm md:text-base text-zinc-300 leading-relaxed">By utilizing Ollama local models, we map theological concepts by intent and context natively. Searching for "heart comfort" retrieves passages on "peace," "Sabr," and "Allah's guidance" locally.</p>
-            </div>
-            <div className="h-28 flex items-end gap-1.5 border-t border-zinc-900/60 pt-4 px-2 select-none pointer-events-none">
-              {[34, 56, 75, 45, 90, 60, 80, 50, 65, 38, 70, 55, 85].map((val, idx) => (
-                <div key={idx} className="flex-1 bg-zinc-900 rounded-t group-hover:bg-emerald-950/20 border border-zinc-850 group-hover:border-emerald-900/30 transition duration-500 relative" style={{ height: `${val}%` }}>
-                  {idx === 4 && <div className="absolute inset-0 bg-emerald-500 animate-pulse rounded-t" />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="md:col-span-4 glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between gap-8 border border-zinc-800/40 relative shadow-lg hover:border-emerald-500/10 transition duration-355">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[9px] bg-zinc-900 border border-zinc-850 text-zinc-400 px-2 py-0.5 rounded uppercase">Hybrid Search</span>
-                <Database className="h-4.5 w-4.5 text-zinc-400" />
-              </div>
-              <h3 className="text-lg font-bold tracking-tight text-zinc-100">Dual Search Matching</h3>
-              <p className="text-sm md:text-base text-zinc-300 leading-relaxed">Combines high-dimensional cosine similarity indexes with Postgres English full-text search. The hybrid architecture calculates relevance and merges indexes in a deterministic scoring pipeline.</p>
-            </div>
-          </div>
-
-          <div className="md:col-span-8 glass-panel rounded-3xl p-6 md:p-8 flex flex-col justify-between gap-8 border border-zinc-800/40 relative shadow-lg hover:border-emerald-500/10 transition duration-300">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[9px] bg-emerald-950/40 border border-emerald-900/30 text-emerald-400 px-2 py-0.5 rounded uppercase">Data Credibility</span>
-                <Lock className="h-4.5 w-4.5 text-emerald-450" />
-              </div>
-              <h3 className="text-xl md:text-2xl font-bold tracking-tight text-zinc-100">Rigorous Citation Mapping & Grades</h3>
-              <p className="text-sm md:text-base text-zinc-300 leading-relaxed">Every recovered text card comes with an expandable detail pane showing deep metadata details: narrator chains, authentic status validation grades (Sahih/Hasan), revelation periods (Makkah/Madinah), and Juz indices.</p>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-zinc-900/60 pt-4 text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-              <div><span className="block text-[8px] text-zinc-650">INDEX TYPE</span><span className="text-zinc-300 font-semibold">QURAN / HADITH</span></div>
-              <div><span className="block text-[8px] text-zinc-650">SELECTION SCORING</span><span className="text-zinc-300 font-semibold">pgvector cos()</span></div>
-              <div><span className="block text-[8px] text-zinc-650">FILTER GRADES</span><span className="text-zinc-300 font-semibold">SAHIH & HASAN</span></div>
-              <div><span className="block text-[8px] text-zinc-650">ENCRYPT OVERLAY</span><span className="text-emerald-400 font-semibold">ACTIVE</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* 9. MINIMAL PREMIUM FOOTER */}
       <footer className="w-full bg-zinc-950/40 border-t border-zinc-900/60 py-10 px-4 mt-auto">

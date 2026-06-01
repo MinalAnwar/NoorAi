@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Amiri } from "next/font/google";
 import "./globals.css";
-
+import { AuthProvider } from "@/lib/auth-context";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -42,9 +42,10 @@ export default function RootLayout({
         {/* Global Mesh Gradient Background */}
         <div className="fixed inset-0 -z-10 mesh-gradient pointer-events-none" />
         
-        {/* Main Content Area */}
         <main className="flex-1 flex flex-col relative z-10">
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </main>
       </body>
     </html>

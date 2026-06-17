@@ -9,7 +9,7 @@ export const runtime = "nodejs";
  * POST /api/chat
  * Streams grounded RAG answers back to the user, citing relevant verses and Hadiths.
  * Response is structured as Server-Sent Events (SSE) to deliver citations alongside text.
- * Chat inference powered by Cloudflare Workers AI (llama-3.3-70b-instruct-fp8-fast).
+ * Chat inference powered by Cloudflare Workers AI (glm-4.7-flash).
  */
 export async function POST(request: NextRequest) {
   try {

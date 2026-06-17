@@ -2,7 +2,7 @@
  * @file src/lib/ai/cloud-ai.ts
  * @description Cloud API implementations for Noor AI.
  *
- * Uses Cloudflare Workers AI for ultra-fast Llama 3.3 70B chat inference
+ * Uses Cloudflare Workers AI for ultra-fast GLM-4.7-Flash chat inference
  * and query expansion.
  * Uses HuggingFace Inference API for nomic-embed-text embeddings to maintain
  * perfect vector compatibility with the existing Supabase database indexes.
@@ -14,7 +14,7 @@
 
 const CF_ACCOUNT_ID = process.env.CF_ACCOUNT_ID ?? "";
 const CF_API_TOKEN = process.env.CF_API_TOKEN ?? "";
-const CF_CHAT_MODEL = process.env.CF_CHAT_MODEL ?? "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+const CF_CHAT_MODEL = process.env.CF_CHAT_MODEL ?? "@cf/zai-org/glm-4.7-flash";
 const CF_AI_BASE = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/run`;
 
 const HUGGINGFACE_API_KEY = process.env.HUGGINGFACE_API_KEY ?? "";

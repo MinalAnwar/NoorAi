@@ -9,7 +9,7 @@
  */
 
 import { supabase } from "../supabase/client";
-import { generateEmbedding, expandQuery } from "../ai/ollama";
+import { generateEmbedding, expandQuery } from "../ai/cloud-ai";
 import type { RetrievalResult, CitationType } from "@/types";
 import type { DocumentType } from "./types";
 

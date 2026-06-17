@@ -11,7 +11,7 @@ import * as path from "node:path";
 import {
   generateEmbeddingsBatch,
   checkOllamaHealth,
-} from "@/lib/ai/ollama";
+} from "@/lib/ai/cloud-ai";
 import type {
   NormalizedDocument,
   EmbeddedDocument,

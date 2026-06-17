@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { retrieveGroundedSources } from "@/lib/rag/retrieval";
+import { streamCFAIChat } from "@/lib/ai/cloud-ai";
 import { Message } from "@/types";
 
 export const runtime = "nodejs";
-
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434";
-const OLLAMA_CHAT_MODEL = process.env.OLLAMA_CHAT_MODEL ?? "llama3"; // Change model based on what you have pulled
 
 /**
  * POST /api/chat
  * Streams grounded RAG answers back to the user, citing relevant verses and Hadiths.
  * Response is structured as Server-Sent Events (SSE) to deliver citations alongside text.
+ * Chat inference powered by Cloudflare Workers AI (glm-4.7-flash).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -44,8 +43,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Retrieval of Grounded Sources
-    let citations = await retrieveGroundedSources(query, {
+    // 2. Retrieval of Grounded Sources (includes query expansion internally)
+    const citations = await retrieveGroundedSources(query, {
       limit: 5,
       sourceFocus: focusSource,
       semanticWeight: 0.7,
@@ -99,124 +98,87 @@ GROUNDED CONTEXT:
 ${groundedContext}
 `;
 
-    // 4. Set up Streaming Response Headers
+    // 4. Set up Streaming Response
     const encoder = new TextEncoder();
     const customStream = new ReadableStream({
       async start(controller) {
-        // Track whether the SSE stream has already been closed to avoid duplicate closes
         let streamClosed = false;
-        // Step A: Immediately send the sources/citations to the client
+
+        const safeClose = () => {
+          if (!streamClosed) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
+            controller.close();
+            streamClosed = true;
+          }
+        };
+
+        const safeError = (msg: string) => {
+          if (!streamClosed) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "error", data: msg })}\n\n`));
+            controller.close();
+            streamClosed = true;
+          }
+        };
+
+        // Step A: Send citations immediately
         controller.enqueue(
           encoder.encode(`data: ${JSON.stringify({ type: "sources", data: citations })}\n\n`)
         );
 
         try {
-          // Step B: Send past messages for standard conversation history context
-          const chatMessagesForAPI = [
+          // Step B: Build messages array for Cloudflare AI
+          const chatMessages = [
             { role: "system", content: systemPrompt },
             ...messages.slice(-5).map((m) => ({
-              role: m.role,
+              role: m.role as "user" | "assistant",
               content: m.content,
             })),
           ];
 
-          // Step C: Trigger streaming completion from Ollama
-          if (OLLAMA_CHAT_MODEL === "mock") {
-            let mockAnswer = "";
-            if (citations.length > 0) {
-               mockAnswer = `**MOCK GENERATOR MODE:**\n\nThe Vector Database perfectly understood your query and returned exactly ${citations.length} authentic sources. \n\nFor example, looking at the top result (**${citations[0].title}**), it states: \n*"${citations[0].text_english}"*\n\n*(Note: Your Qwen chat model is still downloading at 118 KB/s. Until it finishes, I am using this dynamic mock to prove that the database retrieval is working perfectly for any topic you search! Check out the real citation cards on the right!)*`;
-            } else {
-               mockAnswer = `**MOCK GENERATOR MODE:**\n\nI searched the vector database but could not find any authentic verses or Hadiths matching your specific query. Try asking something else!`;
-            }
-
-            const tokens = mockAnswer.split(" ");
-            for (let i = 0; i < tokens.length; i++) {
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ type: "chunk", data: tokens[i] + (i < tokens.length - 1 ? " " : "") })}\n\n`)
-              );
-              await new Promise(r => setTimeout(r, 60)); // Simulate typing speed
-            }
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
-            controller.close();
-            return;
-          }
-
-          const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              model: OLLAMA_CHAT_MODEL,
-              messages: chatMessagesForAPI,
-              stream: true,
-              options: {
-                temperature: 0.1, // Highly deterministic to prevent hallucination
-              },
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`Ollama API returned ${response.status}: ${await response.text()}`);
-          }
-
-          if (!response.body) {
-            throw new Error("Ollama API returned an empty body.");
-          }
-
-          // Step D: Stream text chunks to the client as they arrive
-          const reader = response.body.getReader();
+          // Step C: Get streaming response from Cloudflare Workers AI
+          const cfStream = await streamCFAIChat(chatMessages);
+          const reader = cfStream.getReader();
           const decoder = new TextDecoder("utf-8");
           let buffer = "";
 
+          // Step D: Parse Cloudflare SSE chunks and re-stream to client
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split("\n");
-            
-            // Keep the last partial line in the buffer
             buffer = lines.pop() || "";
 
             for (const line of lines) {
               const cleanLine = line.trim();
-              if (!cleanLine) continue;
+              if (!cleanLine || !cleanLine.startsWith("data: ")) continue;
+
+              const jsonStr = cleanLine.slice(6); // remove "data: "
+              if (jsonStr === "[DONE]") {
+                safeClose();
+                return;
+              }
 
               try {
-                const parsed = JSON.parse(cleanLine);
-                if (parsed.message?.content) {
+                const parsed = JSON.parse(jsonStr);
+                // Cloudflare streams as { response: "..." }
+                const chunk = parsed?.response ?? "";
+                if (chunk) {
                   controller.enqueue(
-                    encoder.encode(`data: ${JSON.stringify({ type: "chunk", data: parsed.message.content })}\n\n`)
+                    encoder.encode(`data: ${JSON.stringify({ type: "chunk", data: chunk })}\n\n`)
                   );
                 }
-              } catch (parseError) {
-                console.warn("Failed to parse Ollama JSON line:", cleanLine, parseError);
+              } catch {
+                // Skip malformed JSON lines
               }
             }
           }
 
-          // Step E: Close the stream safely
-          if (!streamClosed) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: "done" })}\n\n`));
-            controller.close();
-            streamClosed = true;
-          }
+          safeClose();
         } catch (streamError) {
-          // Error handling – only send error if stream not already closed
-          if (!streamClosed) {
-            controller.enqueue(
-              encoder.encode(
-                `data: ${JSON.stringify({
-                  type: "error",
-                  data: "A streaming failure occurred during response generation. Make sure Ollama is running."
-                })}\n\n`
-              )
-            );
-            controller.close();
-            streamClosed = true;
-          }
-          console.error("Error during Ollama chat completions stream:", streamError);
+          console.error("Error during Cloudflare AI stream:", streamError);
+          safeError("A streaming failure occurred. Please check that Cloudflare AI credentials are configured.");
         }
       },
     });

@@ -162,8 +162,13 @@ ${groundedContext}
 
               try {
                 const parsed = JSON.parse(jsonStr);
-                // Cloudflare streams as { response: "..." }
-                const chunk = parsed?.response ?? "";
+                // Handle both response formats:
+                // Legacy Llama format: { response: "..." }
+                // OpenAI-compatible format (GLM-4.7-Flash): { choices: [{ delta: { content: "..." } }] }
+                const chunk =
+                  parsed?.response ??
+                  parsed?.choices?.[0]?.delta?.content ??
+                  "";
                 if (chunk) {
                   controller.enqueue(
                     encoder.encode(`data: ${JSON.stringify({ type: "chunk", data: chunk })}\n\n`)

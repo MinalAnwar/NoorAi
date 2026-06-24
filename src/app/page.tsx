@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChatInterface } from "@/components/rag/chat-interface";
 import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/lib/auth-context";
+import { useRouter } from "next/navigation";
 import { 
   Sparkles, 
   BookOpen, 
@@ -298,6 +300,8 @@ const PREVIEWS = [
 // MAIN EXPORT LANDING PAGE
 // ---------------------------------------------------------
 export default function Home() {
+  const { user, signOut } = useAuth();
+  const router = useRouter();
   const [activeQuery, setActiveQuery] = useState("");
   const workspaceRef = useRef<HTMLDivElement>(null);
   
@@ -376,13 +380,38 @@ export default function Home() {
             </div>
           </div>
 
-          <div>
+          <div className="flex items-center gap-3">
             <button
               onClick={() => workspaceRef.current?.scrollIntoView({ behavior: "smooth" })}
               className="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-emerald-400 hover:border-emerald-500/30 transition-all font-mono text-[10px] font-bold tracking-widest uppercase cursor-pointer"
             >
               Console
             </button>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <span className="text-[10px] font-mono text-zinc-400 block leading-tight">{user.email}</span>
+                  {user.user_metadata?.fiqah_preference && (
+                    <span className="text-[9px] font-mono text-emerald-500/80 uppercase tracking-widest block leading-tight">
+                      {user.user_metadata.fiqah_preference}
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => signOut()}
+                  className="px-4 py-2 rounded-xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600/20 transition-all font-mono text-[10px] font-bold tracking-widest uppercase cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push("/auth")}
+                className="px-4 py-2 rounded-xl bg-emerald-600 border border-emerald-500 text-emerald-50 hover:bg-emerald-500 transition-all font-mono text-[10px] font-bold tracking-widest uppercase cursor-pointer shadow-[0_0_15px_-3px_rgba(16,185,129,0.4)]"
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
       </header>
